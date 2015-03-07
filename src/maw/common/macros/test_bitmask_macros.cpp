@@ -2,11 +2,15 @@
 #include <cstdint>
 #include "bitmask_macros.h"
 
+// Need to define these before calling MAW_DECL_BITS
 #define LAST_FIELD test
 MAW_DECL_DUMMY_OFFS(test)
 
+// typedef our container
 typedef uint16_t test_t;
 
+// declare some fields, field1 of test_t uses
+// 8 bits and is typedefed as uint8_t
 MAW_DECL_BITS(test_t, field1, 8, uint8_t)
 #undef LAST_FIELD
 #define LAST_FIELD field1
@@ -22,9 +26,13 @@ MAW_DECL_BITS(test_t, field3, 2, uint8_t)
 MAW_DECL_BITS(test_t, field4, 3, uint8_t)
 #undef LAST_FIELD
 
+// field{1,2} were typedefed by MAW_DECL_BITS
 enum FIELD1: field1 {F1BE = 0xbe, F1CD = 0xcd};
 enum FIELD2: field2 {F27 = 0x7, F25 = 0x5};
 
+// test the getter and setters declared by MAW_DECL_BITS.
+// We return 77 in case of a failure because that's what
+// automake wants I think.
 int main(int argc, char** argv) {
   
   test_t t1 = 0;

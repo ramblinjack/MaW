@@ -25,7 +25,9 @@
 #include "macros/bitmask_macros.h"
 #include <cstdint>
 
-namespace maw::common::tile {
+namespace maw {
+namespace common {
+namespace tile {
 
 #undef LAST_FIELD
 #define LAST_FIELD tile
@@ -39,7 +41,7 @@ typedef uint32_t tile_t;
 // 256 different should be enough...
 MAW_DECL_BITS(tile_t, terr, 8, uint8_t)
 #undef LAST_FIELD
-#define LAST_FIELD terrain
+#define LAST_FIELD terr
 
 // resource: buffalo, iron, fish, etc...
 // these are PER terrain type
@@ -71,6 +73,8 @@ MAW_DECL_BITS(tile_t, visn, 1, uint8_t)
 #define LAST_FIELD visn
 
 } // end namespace maw::common::tile
+} // end namespace maw::common
+} // end namespace maw
 #endif
 
 

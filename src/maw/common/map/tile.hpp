@@ -1,5 +1,5 @@
-#ifndef TILE_T_HPP
-#define TILE_T_HPP
+#ifndef TILE_HPP
+#define TILE_HPP
 /*
  * Copyright (C) 2015 The Maw Team
  *
@@ -27,7 +27,7 @@
 
 namespace maw {
 namespace common {
-namespace tile {
+namespace map {
 
 #undef LAST_FIELD
 #define LAST_FIELD tile
@@ -72,9 +72,9 @@ MAW_DECL_BITS(tile_t, visn, 1, uint8_t)
 #undef LAST_FIELD
 #define LAST_FIELD visn
 
-} // end namespace maw::common::tile
+} // end namespace maw::common::map
 } // end namespace maw::common
 } // end namespace maw
-#endif
+#endif // ifndef TILE_HPP
 
 

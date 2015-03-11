@@ -2,7 +2,7 @@
 #define BITMASK_MACROS_H
 
 #define MAW_DECL_DUMMY_OFFS(pkg) \
-  static const unsigned pkg##_offs = 0;  
+  static constexpr unsigned pkg##_offs = 0;  
 
 #define MAW_BITMASK(to, from) ((2ULL << (to)) - (1ULL<<(from)))
 
@@ -39,7 +39,7 @@
 */
 #define MAW_DECL_BITS(pkg_t, field, nrbits, type)			\
   typedef type field;							\
-  static const unsigned field##_offs = MAW_TOT_BITS + nrbits;		\
+  static constexpr unsigned field##_offs = MAW_TOT_BITS + nrbits;		\
   constexpr field get_##field(const pkg_t in) {				\
     return (field) ((in & MAW_BITMASK(MAW_TOT_BITS + nrbits -1 , MAW_TOT_BITS)) \
                     >> MAW_TOT_BITS);                                   \

@@ -35,7 +35,8 @@ enum FIELD2: field2_t {F27 = 0x7, F25 = 0x5};
 // We return 77 in case of a failure because that's what
 // automake wants I think.
 int main(int argc, char** argv) {
-  
+
+  if (field2_t_max != 7) return 77;
   test_t t1 = 0;
   set_field1(&t1, F1BE);
   field1_t be = get_field1(t1);

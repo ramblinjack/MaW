@@ -20,7 +20,9 @@
 
 #include "macros/bitmask_macros.h"
 #include <cstdint>
+#include <utility>
 #include "map/map.h"
+#include "plyr/plyr.h"
 
 namespace maw {
 namespace common {
@@ -33,31 +35,31 @@ MAW_DECL_DUMMY_OFFS(unit_t)
 typedef uint64_t unit_t;
 
 // type: the type of the unit, archer or tank or whatever
-// 1024 should be plenty
 MAW_DECL_BITS(unit_t, type, 10, uint16_t)
 #undef LAST_FIELD
 #define LAST_FIELD type
-
-//player: the player the unit belongs to
-// 64 different players
-MAW_DECL_BITS(unit_t, plyr, 6, uint8_t)
-#undef LAST_FIELD
-#define LAST_FIELD plyr
 
 // movp: movement points left
 // We divide this into a numerator and a denominator, so that we can
 // have turns cost less than one movement point, like in civII where
 // moving on a road only costs 1/3 movement point. This is the numerator.
-// 10 bits gives 1000 moves, I don't think anyone wants to move further
-// than that.
-MAW_DECL_BITS(unit_t, movp_num, 10, uint16_t)
+// Any moves larger than hundred or so should probably be handled some other
+// way. 
+MAW_DECL_BITS(unit_t, movp_num, 7, uint8_t)
 #undef LAST_FIELD
 #define LAST_FIELD movp_num
 
 // This is the denominator, it doesn't need to be huge
-MAW_DECL_BITS(unit_t, movp_den, 5, uint8_t)
+MAW_DECL_BITS(unit_t, movp_den, 4, uint8_t)
 #undef LAST_FIELD
 #define LAST_FIELD movp_den
+
+// here we make a special typedef for the movements, together with a hand hacked
+// function for constructing it easily.
+typedef std::pair<movp_num_t, movp_den_t> movp;
+inline movp get_movp(const unit_t unit) {
+  return std::make_pair(get_movp_num(unit), get_movp_den(unit));
+}
 
 // Health: how many hp this unit has left
 MAW_DECL_BITS(unit_t, hlth, 10, uint16_t)
@@ -65,7 +67,7 @@ MAW_DECL_BITS(unit_t, hlth, 10, uint16_t)
 #define LAST_FIELD hlth
 
 // XP: current xperience points of the unit
-MAW_DECL_BITS(unit_t, xp, 10, uint16_t)
+MAW_DECL_BITS(unit_t, xp, 8, uint8_t)
 #undef LAST_FIELD
 #define LAST_FIELD xp
 
@@ -87,19 +89,65 @@ MAW_DECL_BITS(unit_t, mdl3, 2, uint8_t)
 #undef LAST_FIELD
 #define LAST_FIELD mdl3
 
+// the state the unit is in
+MAW_DECL_BITS(unit_t, state, 5, uint8_t)
+#undef LAST_FIELD
+#define LAST_FIELD state
+
+// turns spent in the current state. We only keep track of this up to some
+// number of turns.
+MAW_DECL_BITS(unit_t, tu_cur_st, 5, uint8_t)
+#undef LAST_FIELD
+#define LAST_FIELD tu_cur_st
+
+// Boarded, whether or not the unit is aboard another unit.
+MAW_DECL_BITS(unit_t, brdd, 1, bool);
+#undef LAST_FIELD
+#define LAST_FIELD
+
 
 typedef uint32_t unit_id_t;
 
 typedef struct unit {
-  map::pos_t pos;
-  unit_t unit;
-  unit_id_t id;
+  // The position of this unit, if it is aboard another unit or escorting
+  // another unit, it has the same psition as that unit, so we don't need to
+  // store it.
   union {
-    map::pos_t going_to;
+    map::pos_t pos;
     unit_id_t escorting;
+    unit_id_t aboard;
   };
+  // the actual unit
+  unit_t unit;
+  // the id of the unit
+  unit_id_t id;
+  // the player the unit belongs to
+  plyr::plyr_id_t plyr;
 } unit;
 
+// Movement orders: if a unit is in s state of GOTO, it has an entry of this
+// struct with its id.
+typedef struct mvmt_ordrs {
+  unit_id_t unit;
+  map::pos_t to;
+} mvmt_ordrs;
+
+// Patrol orders, if a unit is in a state of PATROL, it will have a
+// corresponding instance of this struct. This can also be reused for trade
+// units conneting two cities.
+typedef struct ptrl_ordrs {
+  unit_id_t unit;
+  map::pos_t from;
+  map::pos_t to;
+} ptrl_ordrs;
+
+// every unit will have a supertype, which is a sort of grouping of similar
+// units, so for example a tank may be of supertype `armored', and there may be
+// an anti tank gun which gets an attack bonus against all units which are of
+// supertype armored, like tank, modern tank, APC or whatever. This enum will be
+// defined in "supertypes.h" which will be auto genereated form configuration
+// files, this is just the forward declaration;
+enum class supertype;
 
 } // end namespace unit
 } // end namespace common

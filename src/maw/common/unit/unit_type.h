@@ -32,7 +32,7 @@ typedef uint16_t atk_t;
 typedef uint16_t dfns_t;
 
 class unit_type {
-protected:
+private:
   // supertype of this unit type
   const supertype stype;
   // base movement points the unit gets each turn. 

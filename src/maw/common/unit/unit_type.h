@@ -28,8 +28,6 @@ namespace maw {
 namespace common {
 namespace unit {
 
-typedef uint16_t atk_t;
-typedef uint16_t dfns_t;
 
 class unit_type {
 private:
@@ -38,12 +36,12 @@ private:
   // base movement points the unit gets each turn. 
   const movp_num_t movs;
   // the base attack strength
-  const atk_t atk;
+  const uint16_t atk;
   // the base defense strength
-  const dfns_t dfns;
+  const uint16_t dfns;
   // the base health points
   const hlth_t hlth;
-
+  
   // these are virtual functions, meant to be overridden by the individual
   // unit types
 
@@ -51,10 +49,10 @@ private:
   virtual const movp mov_cst(const map::tile_t to) const = 0;
 
   // defensive bonus on tile
-  virtual const dfns_t def_bonus(const map::tile_t on) const = 0;
+  virtual const uint16_t def_bonus(const map::tile_t on) const = 0;
 
   // attack bonus when attacking unit target from tile `from' to tile `to'
-  virtual const atk_t atk_bonus(const unit_t target,
+  virtual const uint16_t atk_bonus(const unit_t target,
                                        const map::tile_t from,
                                        const map::tile_t to) const = 0;
 
@@ -63,8 +61,8 @@ public:
 
   unit_type(const supertype stype,
             const movp_num_t movs,
-            const atk_t atk,
-            const dfns_t dfns,
+            const uint16_t atk,
+            const uint16_t dfns,
             const hlth_t hlth):
   stype(stype),
     movs(movs),
@@ -78,10 +76,10 @@ public:
   movp get_rem_movs(const unit_t unit) const;
   // get attack strength for unit `unit' when it is attacking from tile `from'
   // to  tile `to' and it is attacking unit `against',
-  atk_t get_atk(const unit_t unit, const unit_t against,
+  uint16_t get_atk(const unit_t unit, const unit_t against,
                 const map::tile_t from, const map::tile_t to) const;
   // get defensive strength
-  dfns_t get_dfns(const unit_t unit,
+  uint16_t get_dfns(const unit_t unit,
                          const unit_t attacker,
                          map::tile_t tile) const;
 };

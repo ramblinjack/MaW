@@ -44,19 +44,17 @@ MAW_DECL_BITS(tile_t, terr, 8, uint8_t)
 #define LAST_FIELD terr
 
 // resource: buffalo, iron, fish, etc...
-// these are PER terrain type
-MAW_DECL_BITS(tile_t, resc, 5, uint8_t)
+MAW_DECL_BITS(tile_t, resc, 7, uint8_t)
 #undef LAST_FIELD
 #define LAST_FIELD resc
 
 // improvement: mine, farm, etc...
-// also per terrain type
-MAW_DECL_BITS(tile_t, imprv, 5, uint8_t)
+MAW_DECL_BITS(tile_t, imprv, 7, uint8_t)
 #undef LAST_FIELD
 #define LAST_FIELD imprv
 
 // road: road, paved road, railroad...
-MAW_DECL_BITS(tile_t, road, 4, uint8_t)
+MAW_DECL_BITS(tile_t, road, 3, uint8_t)
 #undef LAST_FIELD
 #define LAST_FIELD road
 
@@ -67,10 +65,15 @@ MAW_DECL_BITS(tile_t, rivr, 2, uint8_t)
 #undef LAST_FIELD
 #define LAST_FIELD rivr
 
-// vision: whether this tile is visible or not
-MAW_DECL_BITS(tile_t, visn, 1, uint8_t)
+// vision: whether this tile is visible or not. This does not mean if the tile
+// is completely black or not. If the tile has never been seen by a player, it
+// should have terr = NONE. If the player has seen this tile, but cannot
+// currently see it, it should be "in the shadow" and it should look like when
+// he last saw it. Then visn is false.
+MAW_DECL_BITS(tile_t, visn, 1, bool)
 #undef LAST_FIELD
 #define LAST_FIELD visn
+
 
 } // end namespace maw::common::map
 } // end namespace maw::common

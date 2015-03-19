@@ -58,20 +58,10 @@ private:
 
 public:
   // this is the interface for a unit
-
-  unit_type(const supertype stype,
-            const movp_num_t movs,
-            const uint16_t atk,
-            const uint16_t dfns,
+  unit_type(const supertype stype, const movp_num_t movs,
+            const uint16_t atk, const uint16_t dfns,
             const hlth_t hlth):
-  stype(stype),
-    movs(movs),
-    atk(atk),
-    dfns(dfns),
-    hlth(hlth)
-    {}
-    
-  
+  stype(stype), movs(movs), atk(atk), dfns(dfns), hlth(hlth) {}
   // how many moves does the unit has left?
   movp get_rem_movs(const unit_t unit) const;
   // get attack strength for unit `unit' when it is attacking from tile `from'

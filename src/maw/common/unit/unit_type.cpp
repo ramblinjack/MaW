@@ -33,13 +33,38 @@ namespace unit {
 movp unit_type::get_rem_movs(const unit_t unit) const {
 // if the unit is at less than half health we cut its movps
 // in half. This is only for initial testing.
-movp m = get_movp(unit);
-if (get_hlth(unit) > hlth/2) {
-return m;
-} else {
-return std::make_pair(m.first/2, m.second);
+  movp m = get_movp(unit);
+  if (get_hlth(unit) > hlth/2) {
+    return m;
+  } else {
+    return std::make_pair(m.first/2, m.second);
+  }
 }
+
+// calculate the attack.
+uint16_t unit_type::get_atk(const unit_t unit, const unit_t against,
+                            const map::tile_t from,
+                            const map::tile_t to) const {
+  uint16_t ret = atk;
+  // mutliply by the modifier for this paricular type of unit
+  ret *= atk_mod(against, from, to);
+
+  // TODO: placeholder, replace with better algorithm.
+  ret *= get_hlth(unit)/hlth;
+  
+  // a unit can never have 0 attack. That would be weird.
+  return ret == 0 ? 1 : ret;
 }
+
+uint16_t unit_type::get_dfns(const unit_t unit, const unit_t attacker,
+                             tile_t tile) {
+  uint16_t ret = dfns;
+  ret *= def_mod(const tile_t on);
+
+  
+  return ret;
+}
+
 } // end namespace unit
 } // end namespace common
 } // end namespace maw

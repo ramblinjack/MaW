@@ -48,11 +48,11 @@ private:
   // the cost of moving to tile `to'
   virtual const movp mov_cst(const map::tile_t to) const = 0;
 
-  // defensive bonus on tile
-  virtual const uint16_t def_bonus(const map::tile_t on) const = 0;
+  // defensive modifier on tile
+  virtual const float def_mod(const map::tile_t on) const = 0;
 
-  // attack bonus when attacking unit target from tile `from' to tile `to'
-  virtual const uint16_t atk_bonus(const unit_t target,
+  // attack modifier when attacking unit target from tile `from' to tile `to'
+  virtual const float atk_mod(const unit_t target,
                                        const map::tile_t from,
                                        const map::tile_t to) const = 0;
 

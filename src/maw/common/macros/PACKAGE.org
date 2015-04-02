@@ -1,0 +1,8 @@
+* Macros
+
+** bitmask_macros.h
+
+Some macros to declare bitmasks. This could probaly be done in a better way, but
+it is what it is. One way would have been to use bitfield, but i heard they were
+evil...
+

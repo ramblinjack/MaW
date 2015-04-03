@@ -41,6 +41,8 @@ private:
   const unsigned dfns;
   // the base health points
   const hlth_t hlth;
+  // what unit this unit becomes when it upgrades
+  const type_t upgrd;
   
   // these are virtual functions, meant to be overridden by the individual
   // unit types
@@ -60,18 +62,35 @@ public:
   // this is the interface for a unit
   unit_type(const supertype stype, const movp_num_t movs,
             const unsigned atk, const unsigned dfns,
-            const hlth_t hlth):
-  stype(stype), movs(movs), atk(atk), dfns(dfns), hlth(hlth) {}
+            const hlth_t hlth, const type_t upgrd):
+    stype(stype), movs(movs), atk(atk), dfns(dfns),
+    hlth(hlth), upgrd(upgrd) {}
+
+  /* Getters */
+  // get supertype
   inline supertype get_stype() const {return stype;}
+  
+  // get the unit this upgrades to
+  inline type_t get_upgrd() const {return upgrd;}
+
+  // get base health
+  inline hlth_t get_hlth() const {return hlth;}
+
+  /* functions implemented in unit_type.cpp */
   // how many moves does the unit has left?
   movp get_rem_movs(const unit_t unit) const;
+
   // get attack strength for unit `unit' when it is attacking from tile `from'
   // to  tile `to' and it is attacking unit `against',
   unsigned get_atk(const unit_t unit, const unit_t against,
                 const map::tile_t from, const map::tile_t to) const;
+
   // get defensive strength
   unsigned get_dfns(const unit_t unit, const unit_t attacker,
                     const map::tile_t tile) const;
+
+
+  
 };
 } // end namespace unit
 } // end namespace common

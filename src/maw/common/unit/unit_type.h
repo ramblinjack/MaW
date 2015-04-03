@@ -1,5 +1,5 @@
-#ifndef UNIT_TYPE_HPP
-#define UNIT_TYPE_HPP
+#ifndef UNIT_TYPE_H
+#define UNIT_TYPE_H
 /*
  * Copyright (C) 2015, The MaW Team
  *
@@ -36,44 +36,44 @@ private:
   // base movement points the unit gets each turn. 
   const movp_num_t movs;
   // the base attack strength
-  const uint16_t atk;
+  const unsigned atk;
   // the base defense strength
-  const uint16_t dfns;
+  const unsigned dfns;
   // the base health points
   const hlth_t hlth;
   
   // these are virtual functions, meant to be overridden by the individual
   // unit types
 
-  // the cost of moving to tile `to'
-  virtual const movp mov_cst(const map::tile_t to) const = 0;
+  // the cost of moving to tile `to'. A return value of 0 shall mean that it is
+  // not possible for this unit to make this move.
+  virtual movp mov_cst(const map::tile_t to) const = 0;
 
-  // defensive modifier on tile
-  virtual const float def_mod(const map::tile_t on) const = 0;
+  // defensive modifier on tile `on' against unit `against'
+  virtual float def_bonus(const map::tile_t on, const unit_t against) const = 0;
 
   // attack modifier when attacking unit target from tile `from' to tile `to'
-  virtual const float atk_mod(const unit_t target,
-                                       const map::tile_t from,
-                                       const map::tile_t to) const = 0;
+  virtual float atk_bonus(const unit_t target, const map::tile_t from,
+                          const map::tile_t to) const = 0;
 
 public:
   // this is the interface for a unit
   unit_type(const supertype stype, const movp_num_t movs,
-            const uint16_t atk, const uint16_t dfns,
+            const unsigned atk, const unsigned dfns,
             const hlth_t hlth):
   stype(stype), movs(movs), atk(atk), dfns(dfns), hlth(hlth) {}
+  inline supertype get_stype() const {return stype;}
   // how many moves does the unit has left?
   movp get_rem_movs(const unit_t unit) const;
   // get attack strength for unit `unit' when it is attacking from tile `from'
   // to  tile `to' and it is attacking unit `against',
-  uint16_t get_atk(const unit_t unit, const unit_t against,
+  unsigned get_atk(const unit_t unit, const unit_t against,
                 const map::tile_t from, const map::tile_t to) const;
   // get defensive strength
-  uint16_t get_dfns(const unit_t unit,
-                         const unit_t attacker,
-                         map::tile_t tile) const;
+  unsigned get_dfns(const unit_t unit, const unit_t attacker,
+                    const map::tile_t tile) const;
 };
 } // end namespace unit
 } // end namespace common
 } // end namespace maw
-#endif // ifndef UNIT_TYPE_HPP
+#endif // ifndef UNIT_TYPE_H

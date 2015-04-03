@@ -42,12 +42,12 @@ movp unit_type::get_rem_movs(const unit_t unit) const {
 }
 
 // calculate the attack.
-uint16_t unit_type::get_atk(const unit_t unit, const unit_t against,
+unsigned unit_type::get_atk(const unit_t unit, const unit_t against,
                             const map::tile_t from,
                             const map::tile_t to) const {
-  uint16_t ret = atk;
+  unsigned ret = atk;
   // mutliply by the modifier for this paricular type of unit
-  ret *= atk_mod(against, from, to);
+  ret *= atk_bonus(against, from, to);
 
   // TODO: placeholder, replace with better algorithm.
   ret *= get_hlth(unit)/hlth;
@@ -56,10 +56,10 @@ uint16_t unit_type::get_atk(const unit_t unit, const unit_t against,
   return ret == 0 ? 1 : ret;
 }
 
-uint16_t unit_type::get_dfns(const unit_t unit, const unit_t attacker,
-                             tile_t tile) {
-  uint16_t ret = dfns;
-  ret *= def_mod(const tile_t on);
+unsigned unit_type::get_dfns(const unit_t unit, const unit_t attacker,
+                             const map::tile_t on) const {
+  unsigned ret = dfns;
+  ret *= def_bonus(on, attacker);
 
   
   return ret;

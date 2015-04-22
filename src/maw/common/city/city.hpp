@@ -37,6 +37,7 @@ typedef uint64_t city_t;
 #undef LAST_FIELD
 #define LAST_FIELD city_t
 MAW_DECL_DUMMY_OFFS(city_t)
+
 // The current amount of shields (or production) that the city has saved
 // up. 
 MAW_DECL_BITS(city_t, 11, prod, uint16_t)

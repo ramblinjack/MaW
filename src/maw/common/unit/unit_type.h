@@ -43,6 +43,8 @@ private:
   const hlth_t hlth;
   // what unit this unit becomes when it upgrades
   const type_t upgrd;
+  // splash damage
+  const unsigned splsh;
   
   // these are virtual functions, meant to be overridden by the individual
   // unit types
@@ -51,21 +53,31 @@ private:
   // not possible for this unit to make this move.
   virtual movp mov_cst(const map::tile_t to) const = 0;
 
-  // defensive modifier on tile `on' against unit `against'
-  virtual float def_bonus(const map::tile_t on, const unit_t against) const = 0;
-
-  // attack modifier when attacking unit target from tile `from' to tile `to'
-  virtual float atk_bonus(const unit_t target, const map::tile_t from,
-                          const map::tile_t to) const = 0;
-
+  // defensive modifier on tile `on'.
+  virtual float def_bonus_terr(const map::tile_t on)
+    const = 0;
+  
+  // defensive modifier against unit `against'
+  virtual float def_bonus_unit(const unit_t against)
+    const = 0;
+  
+  
+  // attack modifier when attacking unit target.
+  virtual float atk_bonus_unit(const unit_t target) const = 0;
+  
+  // attack modifier when attacking from tile `from' to tile `to'.
+  virtual float atk_bonus_terr(const map::tile_t from,
+                               const map::tile_t to) const = 0;
+  
 public:
   // this is the interface for a unit
   unit_type(const supertype stype, const movp_num_t movs,
-            const unsigned atk, const unsigned dfns,
-            const hlth_t hlth, const type_t upgrd):
+           const unsigned atk, const unsigned dfns,
+            const hlth_t hlth, const type_t upgrd,
+            const unsigned splsh):
     stype(stype), movs(movs), atk(atk), dfns(dfns),
-    hlth(hlth), upgrd(upgrd) {}
-
+    hlth(hlth), upgrd(upgrd), splsh(splsh) {}
+  
   /* Getters */
   // get supertype
   inline supertype get_stype() const {return stype;}

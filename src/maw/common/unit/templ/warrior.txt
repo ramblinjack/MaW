@@ -1,0 +1,26 @@
+unit=warrior
+land_unit
+movement=1
+attack=1
+defense=1
+health=8
+upgrades_to=swordsman
+
+
+attack_bonus_unit {
+  against mounted 25%
+  against archer 10%
+}
+
+attack_bonus_terrain {
+  on grassland 10%
+}
+
+defense_bonus_unit {
+  against archer 25%
+}
+
+movement_cost {
+
+
+

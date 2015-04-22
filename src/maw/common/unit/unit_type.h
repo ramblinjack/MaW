@@ -74,7 +74,7 @@ public:
   unit_type(const supertype stype, const movp_num_t movs,
            const unsigned atk, const unsigned dfns,
             const hlth_t hlth, const type_t upgrd,
-            const unsigned splsh):
+            const unsigned splsh = 0):
     stype(stype), movs(movs), atk(atk), dfns(dfns),
     hlth(hlth), upgrd(upgrd), splsh(splsh) {}
   

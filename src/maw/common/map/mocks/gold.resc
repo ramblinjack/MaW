@@ -1,0 +1,5 @@
+name=gold
+provided_by=mine
+trade_bonus {
+  on hill 3
+}

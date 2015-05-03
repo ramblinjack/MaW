@@ -1,0 +1,5 @@
+name=hill
+food=1
+production=1
+trade=0
+default move cost=2

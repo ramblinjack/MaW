@@ -1,0 +1,5 @@
+name=grassland
+food=2
+production=1
+trade=1
+default move cost=1

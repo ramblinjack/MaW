@@ -1,5 +1,5 @@
-#ifndef TERRAIN_H
-#define TERRAIN_H
+#ifndef TERRAIN_HPP
+#define TERRAIN_HPP
 
 /*
  * Copyright (C) 2015
@@ -21,7 +21,8 @@
 /*
   This file contains the definition of the terrain class. This is the class that
   describes some basic fields and methods which all terrain types should have.
-  This class is abstract, it will  be overridden by each individual type of terrain.
+  The terrain class is the simplest, it has no dependencies on anything else,
+  and for this reason it should be the first to be generated.
  */
 
 #include "tile.hpp"
@@ -33,22 +34,21 @@ namespace map {
 class terrain {
 private:
   // base food
-  const uint8_t food;
+  const unsigned food;
   // base production
-  const uint8_t prod;
+  const unsigned prod;
   // base trade
-  const uint8_t trade;
+  const unsigned trade;
 
 public:
-  terrain(const uint8_t food, const uint8_t prod, const uint8_t trade):
+  terrain(unsigned food, unsigned prod, unsigned trade):
     food(food), prod(prod), trade(trade) {}
   
-  virtual uint8_t get_food(tile_t tile) const = 0;
-  virtual uint8_t get_prod(tile_t tile) const = 0;
-  virtual uint8_t get_trade(tile_t tile) const = 0;  
-
+  inline unsigned get_food() const {return food;}
+  inline unsigned get_prod() const {return prod;}
+  inline unsigned get_trade() const {return trade;}  
 }; // end class terrain
 } // end namespace map
 } // end namespace common
 } // end namespace maw
-#endif // TERRAIN_H
+#endif // TERRAIN_HPP

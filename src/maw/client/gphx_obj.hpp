@@ -49,22 +49,25 @@ private:
   // in, not sent over the network, so it doesn't really matter.
   const SDL_surface *icon, *bkgrnd;
 
-  // Description of this object.
-  const std::string descr;
+  // Prty_Name, the pretty name for this object, can include spaces.
+  const std::string prty_name;
 
   // Name of this object
   const std::string name;
 
 public:
-  gphx_obj(SDL_surface icon, SDL_surface bkgrnd = nullptr,
-           std::string descr, std::string name):
-    icon(icon),
-    bkgrnd(bkgrnd),
-    descr(descr),
-    name(name) {}
+  gphx_obj(const char * const icon_file,
+           const char * const bkgrnd_icon_file,
+           const char * const prty_name,
+           const char * const name):
+    name(name),
+    prty_name(prty_name) {
+    
+  }
+  
 
   std::string get_name() const {return name;}
-  std::string get_descr() const {return descr;}
+  std::string get_prty_name() const {return prty_name;}
   SDL_surface get_icon() const {return icon;}
   SDL_surface get_bkgrnd() const {return bkgrnd;}
 };

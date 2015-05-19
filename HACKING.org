@@ -1,0 +1,153 @@
+* Hacking on MaW
+
+Since currently I (jockej) am the only contributer, I thought I would write up a
+bit on how it all works, so people can get to hacking on MaW without having to
+ask me about everything.
+
+** Current status
+
+Currently, there is nothing that actually works...
+
+** Windoze?
+
+I'm currently the only contributor, and I don't own a windows machine so... no.
+
+** The autogeneration
+
+We don't want to hardcode stuff, not more than necessary at least, so a lot of
+MaW will be in the form of configuration files. All logic however, will be
+written in the source code. I toyed with the idea of for example embedding a
+scheme interpreter and have for example battle logic be defined outside the c++
+source code, but I think that would be too complicated, and it would require a
+developer to change it anyway.
+
+*** The conf file format
+
+The idea is to have a pretty readable format, which can be easily understood and
+changed by a non-programmer. I loathe xml, so that wasn't an option, and
+unfortunately I don't think the general public might appreciate the beauty of
+sexps as much as they should... so we chose to do it in simple text files.
+
+I think the files are pretty self explanatory, but there are some caveats one
+has to be aware of.
+
+There are three distinct types in the conf files, simple values, key value pairs
+and blocks. 
+
+**** Valid identifiers 
+
+Valid identifiers are on the form [A-Za-z][A-Za-z0-9_]*. In the case that the
+right hand side is not a number, both sides must be of this form. This is true
+for all but one of the key value pairs, and that is the pretty_name. This can
+include spaces and shit.
+
+**** Key value pairs
+
+Key value pairs are on the form /key=value/, where /value/ can be either an
+identifier or a number, or a pretty name (see above).
+
+**** Simple values
+
+Simple values are just an identifier, like /land_unit/, /medic/ etc.
+
+**** Blocks
+
+Blocks are genrally of the form:
+
+/identifier/ {
+  /condition/ /value/
+  ...
+}
+
+where /condition/ can be something like "on grassland" or "against mounted", or
+"from grassland to mountain", and value is some bonus usually, like 25%, or 1.
+
+There are some variations though. In general I think these conditions should be
+rather self explanatory, the best way to understand them is probably to look at
+some of the files in the mocks directories.
+
+*** So how the heck does it work?
+
+Now this is where it gets interesting. From these conf files, we should generate
+code. We chose to do it this way instead of reading the files at runtime because
+it seemed simpler.
+
+**** Walk me through it...
+
+The 10000 yard view is this: the conf files are fed through sed, where they are
+transformed into m4 definitions via various substitutions, then they are fed
+through m4 together with a template, to produce a class declaration.
+
+For example a conf file for a unit contains the key value pair /name=tank/. When
+run through our sed scripts this will turn into /define(`NAME', `tank')dnl/
+(well, not really, but let's assume...), which is a m4 definition. In the unit
+template file there is a line like this: /class NAME : public unit_type/, so
+when we run the whole thing we will end up with this: /class tank : public
+unit_type/. Hey presto! Valid c++!
+
+Now, the blocks are sligthly more interesting. Basically, they get transformed
+into the body of a function or a switch. An example: a conf file contains the
+following block:
+
+defense_bonus_unit {
+  against mounted 25%
+  against archer 50%
+}
+
+This will be transformed by sed to:
+
+define(`DEFENSE_BONUS_UNIT',`
+  case MOUNTED return (25f/100f);
+  case ARCHER return (50f/100f);
+')
+
+which is obviously the body of a switch statement. The template file contains
+something like this:
+
+virtual float def_bonus_unit(unit_t against) {
+  switch(get_supertype(against)) {
+    ifdef(`DEFENSE_BONUS_UNIT', `DEFENSE_BONUS_UNIT')
+    default: return 0f;
+  }
+}
+
+That /ifdef/ means: if this macro is defined, insert it, otherwise insert
+nothing. This means that if we leave out that block from a unit conf file, the
+c++ code will look like this:
+
+virtual float def_bonus_unit(unit_t against) {
+  switch(get_supertype(against)) {
+     default: return 0f;
+  }
+}
+
+which is useless, but valid! If the macro was defined like in our example above,
+the output would be:
+
+virtual float def_bonus_unit(unit_t against) {
+  switch(get_supertype(against)) {
+    case MOUNTED return (25f/100f);
+    case ARCHER return (50f/100f);
+    default: return 0f;
+  }
+}
+
+which makes a lot more sense. Now when we look up the bonus this particular unit
+(notice the method is virtual) gets against a unit of supertype /against/, we
+will get the proper one.
+
+There are more things going on though... we also declare enums, constants, a
+vector, init functions... For the full picture, you'll have to read the source, Luke.
+
+*** A note on dependencies
+
+I would like to keep the dependencies... humble. Right now we require the usual
+UNIX(r) tools and nothing more, and I'd like to keep it that way, except we'll
+have to depend on autoconf, but so does everything else so...
+
+But what this means is that we should avoid to depend on things as much as
+possible, both programs (no python) particular shells (POSIX sh ftw) and non
+posixy behaviours (no GNUisms in the ls, sed, grep commands etc).
+
+At the very least I want this to build on FreeBSD and Linux, but I think we
+should aim higher. So try to stick to POSIX, both in the source and in the build scripts.

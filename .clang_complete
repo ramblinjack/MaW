@@ -1,7 +1,4 @@
 -std=c++11
--I./src/maw/common/unit
--I./src/maw/common/map
--I./src/maw/common/city
--I./src/maw/common/plyr
+-I./src/maw/common/
 -I./src/maw/client
 -I./src/maw/server

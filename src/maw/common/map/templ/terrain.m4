@@ -7,7 +7,10 @@ class NAME : public terrain
   public:
     NAME`()': terrain(FOOD, PRODUCTION, TRADE)
 #ifdef CLIENT
-     , gphx_obj(ICON, BACKGROUND_ICON, PRETTY_NAME, PLURAL)
+    , gphx_obj(DATADIR/resc/ "ICON",
+    DATADIR/resc/ "ifdef(`BACKGROUND_ICON', `BACKGROUND_ICON', `nullptr')",
+    ifdef(`PRETTY_NAME', `PRETTY_NAME', `NAME'),
+    ifdef(`PLURAL', `PLURAL', `NAME'))
 #endif
      {}
 };

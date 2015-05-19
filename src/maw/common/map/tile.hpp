@@ -74,10 +74,9 @@ MAW_DECL_BITS(tile_t, visn, 1, bool)
 #undef LAST_FIELD
 #define LAST_FIELD visn
 
+// BITS LEFT: 4
 
 } // end namespace maw::common::map
 } // end namespace maw::common
 } // end namespace maw
 #endif // ifndef TILE_HPP
-
-

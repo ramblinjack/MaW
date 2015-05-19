@@ -1,5 +1,6 @@
 name=corn
 provided_by=farm
+icon=corn.png
 food_bonus {
   on grassland 2
   on hill 1

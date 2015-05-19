@@ -28,7 +28,6 @@ namespace maw {
 namespace common {
 namespace unit {
 
-
 class unit_type {
 private:
   // supertype of this unit type
@@ -45,36 +44,28 @@ private:
   const type_t upgrd;
   // splash damage
   const unsigned splsh;
-  
+  // resources required to build this unit
+  std::vector<resc_t> req_resc;
   // these are virtual functions, meant to be overridden by the individual
   // unit types
 
-  // the cost of moving to tile `to'. A return value of 0 shall mean that it is
-  // not possible for this unit to make this move.
-  virtual movp mov_cst(const map::tile_t to) const = 0;
-
   // defensive modifier on tile `on'.
-  virtual float def_bonus_terr(const map::tile_t on)
-    const = 0;
+  virtual float def_bonus_terr(map::tile_t on) const = 0;
   
   // defensive modifier against unit `against'
-  virtual float def_bonus_unit(const unit_t against)
-    const = 0;
-  
+  virtual float def_bonus_unit(unit_t against) const = 0;
   
   // attack modifier when attacking unit target.
-  virtual float atk_bonus_unit(const unit_t target) const = 0;
+  virtual float atk_bonus_unit(unit_t target) const = 0;
   
   // attack modifier when attacking from tile `from' to tile `to'.
-  virtual float atk_bonus_terr(const map::tile_t from,
-                               const map::tile_t to) const = 0;
+  virtual float atk_bonus_terr(map::tile_t from, map::tile_t to) const = 0;
   
 public:
   // this is the interface for a unit
-  unit_type(const supertype stype, const movp_num_t movs,
-           const unsigned atk, const unsigned dfns,
-            const hlth_t hlth, const type_t upgrd,
-            const unsigned splsh = 0):
+  unit_type(supertype stype, movp_num_t movs, unsigned atk, unsigned dfns,
+            hlth_t hlth, type_t upgrd, unsigned splsh,
+            const std::initializer_list<resc_t>):
     stype(stype), movs(movs), atk(atk), dfns(dfns),
     hlth(hlth), upgrd(upgrd), splsh(splsh) {}
   
@@ -90,19 +81,19 @@ public:
 
   /* functions implemented in unit_type.cpp */
   // how many moves does the unit has left?
-  movp get_rem_movs(const unit_t unit) const;
+  movp get_rem_movs(unit_t unit) const;
 
   // get attack strength for unit `unit' when it is attacking from tile `from'
   // to  tile `to' and it is attacking unit `against',
-  unsigned get_atk(const unit_t unit, const unit_t against,
-                const map::tile_t from, const map::tile_t to) const;
+  unsigned get_atk(unit_t unit, unit_t against,
+                   map::tile_t from, map::tile_t to) const;
 
   // get defensive strength
-  unsigned get_dfns(const unit_t unit, const unit_t attacker,
-                    const map::tile_t tile) const;
+  unsigned get_dfns(unit_t unit, unit_t attacker, map::tile_t tile) const;
 
-
-  
+  // the cost of moving to tile `to'. A return value of 0 shall mean that it is
+  // not possible for this unit to make this move.
+  virtual movp mov_cst(map::tile_t to) const = 0;
 };
 } // end namespace unit
 } // end namespace common

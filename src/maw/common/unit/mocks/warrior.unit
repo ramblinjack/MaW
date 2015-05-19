@@ -1,0 +1,10 @@
+name=warrior
+plural=warriors
+supertype=melee
+land_unit
+icon=warrior.png
+movement=1
+attack=1
+defense=1
+health=8
+upgrades_to=swordsman

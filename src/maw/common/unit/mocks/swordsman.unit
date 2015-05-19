@@ -1,0 +1,16 @@
+name=swordsman
+plural=swordsmen
+supertype=melee
+land_unit
+icon=swordsman.png
+movement=1
+attack=3
+defense=2
+health=10
+upgrades_to=pikeman
+requires=iron
+
+attack_bonus_unit {
+  against melee 50%
+}
+

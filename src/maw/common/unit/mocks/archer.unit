@@ -1,0 +1,12 @@
+name=archer
+plural=archers
+supertype=archer
+land_unit
+icon=archer.png
+movement=1
+attack=2
+defense=3
+
+defense_bonus_unit {
+  against melee 100%
+}

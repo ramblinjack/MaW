@@ -14,90 +14,114 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-# Generates one class definition.
-# $1: a def file
-# $2: filename to write the m4 defs to
-# $3: class name to generate
-# $4: directory where the templates are
-gen_class_def()
+# Strip the suffix and uppercase the filename
+# $1: The suffix
+# $2: Filename
+strip_and_upper()
 {
-    tr [a-z] [A-Z] < "$1" \
-        | sed -f "$4"/$3.sed > "$2"
-    printf "\n" >> "$2" # to stop m4 complaining about a trailing newline
-    m4 "$2" "$4"/"$3.m4"
+    SUFLEN=`expr length $1`     # Length of the suffix
+    LENGTH=`expr $SUFLEN + 2`   # ... plus one dot and one newline
+    echo -n "$FILE" | rev | cut -c "$LENGTH-" | rev | tr [a-z] [A-Z] | tr -d '\n'
 }
 
 # $1: suffix
-# $2: filename to write it to
-# $3: name of the enum
-# $4: datatype of the enum
+# $2: name of the enum
+# $3: filename to write it to
 gen_enum() 
 {
-    SUFLEN=`expr length $1`
-    LENGTH=`expr $SUFLEN + 2`
-    NAME_UP=`echo $3 | tr [a-z] [A-Z]`
-    printf "enum $3 : $4 {\n%s_NONE,\n" "$NAME_UP" >> "$2"
+    NAME_UP=`echo $2 | tr [a-z] [A-Z]` # Name of the enum in upper case
+    printf "typedef enum $2 {\n  %s_NONE,\n" "$NAME_UP" >> "$3"
     for FILE in `ls *.$1`
     do
-        echo -n "$FILE" | rev | cut -c "$LENGTH-" | rev | tr [a-z] [A-Z] >> "$2"
-        echo -n "," >> "$2"
+        printf "  " >> "$3"
+        strip_and_upper "$1" "$FILE" >> "$3"
+        echo "," >> "$3"
     done
-    sed -i '$s/,$//' "$2" # remove the last comma
-    printf "};\n\n" >> "$2"
+    sed -i '$s/,$//' "$3" # remove the last comma
+    printf "} $2;\n\n" >> "$3"
 }
 
-
+# Generate a function which returns a vector
 # $1: file suffix
-# $2: file to write to
-# $3: data type of the vector
-# $4: number of enum elements for this class
+# $2: data type of the vector, ie the name of the base class
+# $3: number of enum elements for this class
+# $4: file to write to
 gen_vector()
 {
-    cat >> $2 <<EOF
-std::vector<$3*> *init_$3s() {
-  std::vector<$3*> *ret = new std::vector<$3*>($4);
+    cat >> "$4" <<EOF
+std::vector<$2*> *init_$2s() {
+  std::vector<$2*> *ret = new std::vector<$2*>($3);
   ret->at(0) = nullptr;
 EOF
-    SUFLEN=`expr length $1`
-    LENGTH=`expr $SUFLEN + 2`
     for FILE in `ls *.$1`
     do
-        NAME=`echo -n "$FILE" | rev | cut -c "$LENGTH-" | rev`
-        NAME_UP=`echo "$NAME" | tr [a-z] [A-Z]`
-        echo "  ret->at($NAME_UP) = new $NAME();" >> $2
+        NAME_UP=`strip_and_upper "$1" "$FILE"`
+        NAME=`echo "$NAME_UP" | tr [A-Z] [a-z]`
+        echo "  ret->at($NAME_UP) = new $NAME();" >> $4
     done
-    printf "  return ret;\n}\n\n" >> $2
+    printf "  return ret;\n}\n\n" >> $4
+}
+
+# Generates one class definition
+# $1: a def file
+# $2: name of the .sed and .m4 files, without suffix
+gen_class_def()
+{
+    TMPFILE=`mktemp`
+    sed -f "../templ/$2.sed" < "$1" > "$TMPFILE"
+    printf "\n" >> "$TMPFILE" # to stop m4 complaining about a trailing newline
+    m4 "$TMPFILE" "../templ/$2.m4"
+    rm "$TMPFILE"
 }
 
 # Generates the classes for $1.
-# $1: class name to generate
-# $2: file to write to
-# $3: file ending
-# $4: templates directory
+# $1: name of the .sed and .m4 files, without suffix
+# $2: file suffix
+# $3: file to write to
 gen_classes()
 {
-    # A temporary file to write m4 defs to, we put it as a temp file in the hope
-    # that the user building will (as any sane person would) have their /tmp
-    # directory mounted in RAM.
-    TMPFILE=`mktemp`
-
     # Class definitions.
-    for FILE in `ls *.$3`
+    for FILE in `ls *.$2`
     do
-        gen_class_def "$FILE" "$TMPFILE" "$1" "$4" >> "$2"
+        gen_class_def "$FILE" "$1" >> "$3"
     done
-    rm $TMPFILE
-    printf "\n" >> "$2"
+    printf "\n" >> "$3"
 }
 
+# Counts the number of files with the given suffix, then adds one, for the first
+# 'null' type.
 # $1: suffix
-# $2: name of the constant
-# $3: file to write to
-count_stuff()
+count_files()
 {
     NFILES=`ls *.$1 | wc -l`
-    NENUMS=`expr $NFILES + 1`
-    echo "const unsigned $2 = $NENUMS;" >> "$3"
-    echo "$NENUMS"
+    NFILES_PLUS_ONE=`expr $NFILES + 1`
+    echo "$NFILES_PLUS_ONE"
 }
 
+# Generates implementaions or declarations for the bitfield access functions
+# from a bitfield definition file
+# $1: The data type
+# $2: the file with the m4 definitions
+# $3: The file with the field definitions
+# $4: The file to write to
+gen_bitfld()
+{
+    TMPFILE=`mktemp`
+    OFFS=0
+    while read FIELD
+    do
+        # Ignore comment lines
+        FIRST=`expr substr "$FIELD" 1 1`
+        if [ "$FIRST" = "#" ]
+        then
+            continue
+        fi
+        echo "define(DATA_TYPE,$1)define(OFFS,$OFFS)dnl" > "$TMPFILE"
+        SIZE=`echo $FIELD | cut -s -d":" -f2`
+        NAME=`echo $FIELD | cut -s -d":" -f1`
+        echo "define(FIELD_NAME,$NAME)define(SIZE,$SIZE)dnl" >> "$TMPFILE"
+        m4 "$TMPFILE" "$2" >> "$4"
+        OFFS=`expr $OFFS + $SIZE`
+    done < "$3"
+    rm "$TMPFILE"
+}

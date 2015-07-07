@@ -1,5 +1,6 @@
 name=grassland
+water_tile=false
 food=2
 production=1
 trade=1
-default move cost=1
+default_move_cost=1

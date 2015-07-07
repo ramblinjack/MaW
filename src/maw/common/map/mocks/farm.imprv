@@ -1,6 +1,5 @@
 name=farm
-turns=3
-value=40
+cost=3
 food_bonus {
   on grassland 1, with wheat 2, with corn 2
   on hill 1

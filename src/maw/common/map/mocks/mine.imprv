@@ -1,6 +1,6 @@
 name=mine
 turns=3
-value=40
+cost=40
 production_bonus {
   on hill 2
 }

@@ -1,8 +1,5 @@
-#ifndef TERRAIN_HPP
-#define TERRAIN_HPP
-
 /*
- * Copyright (C) 2015
+ * Copyright (C) 2015, The MaW Team
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,37 +15,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
-  This file contains the definition of the terrain class. This is the class that
-  describes some basic fields and methods which all terrain types should have.
-  The terrain class is the simplest, it has no dependencies on anything else,
-  and for this reason it should be the first to be generated.
- */
-
-#include "tile.hpp"
-
 namespace maw {
 namespace common {
 namespace map {
 
-class terrain {
+class terr {
 private:
-  // base food
+  /*! base food */
   const unsigned food;
-  // base production
+  /**! base production */
   const unsigned prod;
-  // base trade
+  /*! base trade*/
   const unsigned trade;
-
+  /*! Whether or not this is a water tile */
+  bool water_tile;
 public:
-  terrain(unsigned food, unsigned prod, unsigned trade):
-    food(food), prod(prod), trade(trade) {}
-  
+  terr(unsigned food, unsigned prod, unsigned trade, bool water_tile):
+    food(food), prod(prod), trade(trade), water_tile(water_tile) {}
+  inline bool is_water_tile() const {return water_tile;}
   inline unsigned get_food() const {return food;}
   inline unsigned get_prod() const {return prod;}
   inline unsigned get_trade() const {return trade;}  
-}; // end class terrain
+}; // end class terr
 } // end namespace map
 } // end namespace common
 } // end namespace maw
-#endif // TERRAIN_HPP
+
+
+

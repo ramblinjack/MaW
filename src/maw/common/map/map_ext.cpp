@@ -1,8 +1,5 @@
-#ifndef MAP_H
-#define MAP_H
-
 /*
- * Copyright (C) 2015, the MaW Team
+ * Copyright (C) 2015, The MaW Team
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,35 +15,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "tile.hpp"
-#include <cstdio>
+#include "map_ext.h"
+#include "map_int_gen.hpp"
 
-namespace maw {
-namespace common {
-namespace map {
+using namespace maw::common::map;
+using namespace std;
 
-typedef uint16_t coord_t;
+vector<terr*> *terrs;
+vector<resc*> *rescs;
+vector<imprv*> *imprvs;
 
-typedef struct pos_t {
-  coord_t x, y;
-} pos_t;
+int32_t init_map() {
+  terrs = init_terrs();
+  rescs = init_rescs();
+  imprvs = init_imprvs();
+}
 
-typedef struct map {
-  coord_t xsize, ysize;
-  tile_t* map;
-} map;
-
-map* read_map(const char* file);
-
-bool write_map(const char* file);
-
-map* read_map(FILE* file);
-
-bool write_map(FILE* file);
-
-bool update_map(FILE* file, map& themap, pos_t pos, tile_t tile);
-
-} // end namespace map
-} // end namespace common
-} // end namespace maw
-#endif // ifndef MAP_H

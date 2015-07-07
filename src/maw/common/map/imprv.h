@@ -1,3 +1,5 @@
+#ifndef IMPRV_H
+#define IMPRV_H
 /*
  * Copyright (C) 2015, The MaW Team
  *
@@ -15,4 +17,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace maw {
+namespace common {
+namespace map {
 
+#include "map_glbl.h" // for maw_tile
+
+class imprv {
+private:
+  /*! The cost to build this improvement */
+  const unsigned cost;
+public:
+  imprv(unsigned cost): cost(cost) {}
+  inline unsigned get_cost() const {return cost;}
+  virtual unsigned get_food_bonus(maw_tile tile) const = 0;
+  virtual unsigned get_prod_bonus(maw_tile tile) const = 0;
+  virtual unsigned get_trade_bonus(maw_tile tile) const = 0;  
+}; // end class imprv
+} // end namespace map
+} // end namespace common
+} // end namespace maw
+
+#endif /* ifndef IMPRV_H */

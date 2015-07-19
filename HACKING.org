@@ -31,28 +31,16 @@ sexps as much as they should... so we chose to do it in simple text files.
 I think the files are pretty self explanatory, but there are some caveats one
 has to be aware of.
 
-There are three distinct types in the conf files, simple values, key value pairs
-and blocks. 
-
-**** Valid identifiers 
-
-Valid identifiers are on the form [A-Za-z][A-Za-z0-9_]*. In the case that the
-right hand side is not a number, both sides must be of this form. This is true
-for all but one of the key value pairs, and that is the pretty_name. This can
-include spaces and shit.
+There are two distinct types in the conf files, key value pairs and blocks. 
 
 **** Key value pairs
 
 Key value pairs are on the form /key=value/, where /value/ can be either an
 identifier or a number, or a pretty name (see above).
 
-**** Simple values
-
-Simple values are just an identifier, like /land_unit/, /medic/ etc.
-
 **** Blocks
 
-Blocks are genrally of the form:
+Blocks are generally of the form:
 
 /identifier/ {
   /condition/ /value/
@@ -76,14 +64,14 @@ it seemed simpler.
 
 The 10000 yard view is this: the conf files are fed through sed, where they are
 transformed into m4 definitions via various substitutions, then they are fed
-through m4 together with a template, to produce a class declaration.
+through =m4= together with a template, to produce a class declaration.
 
 For example a conf file for a unit contains the key value pair /name=tank/. When
-run through our sed scripts this will turn into /define(`NAME', `tank')dnl/
+run through our sed scripts this will turn into src_m4{define(`name', `tank')dnl}
 (well, not really, but let's assume...), which is a m4 definition. In the unit
-template file there is a line like this: /class NAME : public unit_type/, so
-when we run the whole thing we will end up with this: /class tank : public
-unit_type/. Hey presto! Valid c++!
+template file there is a line like this: ~class name : public unit_type~, so
+when we run the whole thing we will end up with this: ~class tank : public
+unit_type~. Hey presto! Valid c++!
 
 Now, the blocks are sligthly more interesting. Basically, they get transformed
 into the body of a function or a switch. An example: a conf file contains the
@@ -96,41 +84,49 @@ defense_bonus_unit {
 
 This will be transformed by sed to:
 
-define(`DEFENSE_BONUS_UNIT',`
-  case MOUNTED return (25f/100f);
-  case ARCHER return (50f/100f);
+#+BEGIN_SRC m4 -n
+define(defense_bonus_unit,`
+  case MOUNTED: return (25f/100f);
+  case ARCHER: return (50f/100f);
 ')
+#+END_SRC
 
 which is obviously the body of a switch statement. The template file contains
 something like this:
 
-virtual float def_bonus_unit(unit_t against) {
+#+BEGIN_SRC m4 -n
+virtual float def_bonus_unit(maw_unit against) {
   switch(get_supertype(against)) {
-    ifdef(`DEFENSE_BONUS_UNIT', `DEFENSE_BONUS_UNIT')
+    ifdef(`defense_bonus_unit', `defense_bonus_unit')
     default: return 0f;
   }
 }
+#+END_SRC
 
-That /ifdef/ means: if this macro is defined, insert it, otherwise insert
+That ~ifdef~ means: if this macro is defined, insert it, otherwise insert
 nothing. This means that if we leave out that block from a unit conf file, the
 c++ code will look like this:
 
+#+BEGIN_SRC c++ -n
 virtual float def_bonus_unit(unit_t against) {
   switch(get_supertype(against)) {
      default: return 0f;
   }
 }
+#+END_SRC
 
 which is useless, but valid! If the macro was defined like in our example above,
 the output would be:
 
+#+BEGIN_SRC c++ -n
 virtual float def_bonus_unit(unit_t against) {
   switch(get_supertype(against)) {
-    case MOUNTED return (25f/100f);
-    case ARCHER return (50f/100f);
+    case MOUNTED: return (25f/100f);
+    case ARCHER: return (50f/100f);
     default: return 0f;
   }
 }
+#+END_SRC
 
 which makes a lot more sense. Now when we look up the bonus this particular unit
 (notice the method is virtual) gets against a unit of supertype /against/, we
@@ -150,4 +146,5 @@ possible, both programs (no python) particular shells (POSIX sh ftw) and non
 posixy behaviours (no GNUisms in the ls, sed, grep commands etc).
 
 At the very least I want this to build on FreeBSD and Linux, but I think we
-should aim higher. So try to stick to POSIX, both in the source and in the build scripts.
+should aim higher. So try to stick to POSIX, both in the source and in the 
+build scripts.

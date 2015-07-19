@@ -1,7 +1,7 @@
 name=swordsman
 plural=swordsmen
 supertype=melee
-land_unit
+movement_class=land
 icon=swordsman.png
 movement=1
 attack=3

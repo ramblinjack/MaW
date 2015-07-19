@@ -15,20 +15,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# This script generates terrains and also the classes for improvements and
-# resources, in short all the classes in the map package.
-# See PACKAGE.org in the map directory for a description of what the files
-# contain.
-
 ###############################################################################
 ##                                                                           ##
-##   Generate the files for the map package                                  ##
+##              Generate the files for the unit package                      ##
 ##                                                                           ##
 ###############################################################################
 
-GLBL_GEN_H="../map_glbl_gen.h"
-GLBL_GEN_CPP="../map_glbl_gen.cpp"
-INT_GEN_HPP="../map_int_gen.hpp"
+GLBL_GEN_H="../unit_glbl_gen.h"
+GLBL_GEN_CPP="../unit_glbl_gen.cpp"
+INT_GEN_HPP="../unit_int_gen.hpp"
 
 # $1 the templates directory to use, either the real or the mock
 # Change to the def or mocks directory... just so we know where we are
@@ -42,11 +37,8 @@ fi
 # Load all the "generic" functions
 source ../../scripts/gen_funcs.sh 
 
-# Count the number of each thing, this will be needed in multiple places, so we
-# do it here before the real thing starts.
-NTERRAINS=`count_files terr`
-NRESCS=`count_files resc`
-NIMPRVS=`count_files imprv`
+# Count the number of units
+NUNITS=`count_files unit`
 
 ################################################################################
 ##                              GLBL_GEN_H                                    ##
@@ -57,22 +49,37 @@ NIMPRVS=`count_files imprv`
 # extern C
 cat > "$GLBL_GEN_H" <<EOF
 /* This file is auto generated, DO NOT EDIT! */
-#ifndef MAP_GLBL_GEN_H
-#define MAP_GLBL_GEN_H
+#ifndef UNIT_GLBL_GEN_H
+#define UNIT_GLBL_GEN_H
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "map_glbl.h"
+#include "unit_glbl.h"
 EOF
 
-printf "\nconst uint32_t NMAW_TERR = %d, NMAW_RESC = %d, NMAW_IMPRV = %d;\n" \
-       $NTERRAINS $NRESCS $NIMPRVS >> "$GLBL_GEN_H"
+printf "\nconst uint32_t NMAW_UNIT_TYPE = %d;\n" $NUNITS >> "$GLBL_GEN_H"
 
-gen_enum terr maw_terr "$GLBL_GEN_H"
-gen_enum resc maw_resc "$GLBL_GEN_H"
-gen_enum imprv maw_imprv "$GLBL_GEN_H"
+gen_enum unit maw_unit_type "$GLBL_GEN_H"
 
-gen_bitfld maw_tile ../../scripts/bitfields_decl.m4 ../templ/tile.bits \
+echo "typedef enum maw_supertype {" >> "$GLBL_GEN_H"
+N=0
+# NUNITS includes the 'NONE' type, so the number of actual units is one less
+NACTUAL=`expr "$NUNITS" - 1` 
+for FILE in `ls *.unit`
+do
+    NAME=`grep supertype "$FILE" | cut -s -d"=" -f2 | tr [a-z] [A-Z]`
+    echo -n "  $NAME" >> "$GLBL_GEN_H"
+    N=`expr "$N" + 1`
+    if [ "$N" -eq $NACTUAL ]
+    then
+        break
+    else
+        echo "," >> "$GLBL_GEN_H"
+    fi
+done
+printf "\n} maw_supertype;\n" >> "$GLBL_GEN_H"
+
+gen_bitfld maw_unit_info ../../scripts/bitfields_decl.m4 ../templ/unit.bits \
            "$GLBL_GEN_H"
 
 cat >> "$GLBL_GEN_H" <<EOF
@@ -89,27 +96,20 @@ cat > "$INT_GEN_HPP" <<EOF
 // This file is auto generated, DO NOT EDIT!
 #ifndef MAP_INT_GEN_HPP
 #define MAP_INT_GEN_HPP
-#include "imprv.h"
-#include "resc.h"
-#include "terr.h"
-#include "map_glbl.h"
+#include "unit_glbl.h"
 #include "map_glbl_gen.h"
 #include <vector>
 namespace maw {
 namespace common {
-namespace map {
+namespace unit {
 EOF
 
-gen_classes terr terr "$INT_GEN_HPP"
-gen_classes resc resc "$INT_GEN_HPP"
-gen_classes imprv imprv "$INT_GEN_HPP"
+gen_classes unit unit "$INT_GEN_HPP"
 
-gen_vector terr terr "$NTERRAINS" "$INT_GEN_HPP"
-gen_vector resc resc "$NRESCS" "$INT_GEN_HPP"
-gen_vector imprv imprv "$NIMPRVS" "$INT_GEN_HPP"
+gen_vector unit unit "$NUNITS" "$INT_GEN_HPP"
 
 cat >> "$INT_GEN_HPP" <<EOF
-} // end namespace map
+} // end namespace unit
 } // end namespace common
 } // end namespace maw
 #endif // ifndef MAP_INT_GEN_HPP
@@ -121,6 +121,6 @@ EOF
 echo '// This file is auto generated, DO NOT EDIT!' > "$GLBL_GEN_CPP"
 echo '#include "map_glbl_gen.h"' >> "$GLBL_GEN_CPP"
 echo '#include "map_glbl.h"' >> "$GLBL_GEN_CPP"
-gen_bitfld maw_tile ../../scripts/bitfields_impl.m4 ../templ/tile.bits \
+gen_bitfld maw_unit_type ../../scripts/bitfields_impl.m4 ../templ/unit.bits \
            "$GLBL_GEN_CPP"
 

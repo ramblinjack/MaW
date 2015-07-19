@@ -1,7 +1,7 @@
 name=archer
 plural=archers
 supertype=archer
-land_unit
+movement_class=land
 icon=archer.png
 movement=1
 attack=2

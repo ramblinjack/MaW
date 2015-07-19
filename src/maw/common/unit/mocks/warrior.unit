@@ -1,7 +1,7 @@
 name=warrior
 plural=warriors
 supertype=melee
-land_unit
+movement_class=land
 icon=warrior.png
 movement=1
 attack=1

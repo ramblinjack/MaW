@@ -1,5 +1,3 @@
-#ifndef AMPHIB_UNIT_H
-#define AMPHIB_UNIT_H
 /*
  * Copyright (C) 2015, The MaW Team
  *
@@ -16,23 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include "unit_glbl.h"
 
-#include "mvmnt_type.h" // for mvmnt_type
+uint32_t maw_rem_movs(maw_unit_state);
 
-namespace maw {
-namespace common {
-namespace unit {
-
-class amphib_unit: public mvmnt_type {
-private:
-  const unsigned max_water_mvs;
-public:
-  amphib_unit(unsigned max_water_mvs): mvmnt_type(mvmnt_t_e::AMPHIB),
-                                   max_water_mvs(max_water_mvs) {}
-  virtual unsigned dflt_mv_cst(tile_t to) const {return 1;}
-  inline get_max_water_mvs() const {return max_water_mvs;}
-};
-} // end namespace unit
-} // end namespace common
-} // end namespace maw
-#endif // ifndef AMPHIB_UNIT_H
+#ifdef __cplusplus
+}
+#endif

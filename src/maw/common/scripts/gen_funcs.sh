@@ -33,7 +33,7 @@ gen_enum()
     printf "typedef enum $2 {\n  %s_NONE,\n" "$NAME_UP" >> "$3"
     for FILE in `ls *.$1`
     do
-        printf "  " >> "$3"
+        echo "  " >> "$3"
         strip_and_upper "$1" "$FILE" >> "$3"
         echo "," >> "$3"
     done
@@ -70,7 +70,7 @@ gen_class_def()
     TMPFILE=`mktemp`
     sed -f "../templ/$2.sed" < "$1" > "$TMPFILE"
     printf "\n" >> "$TMPFILE" # to stop m4 complaining about a trailing newline
-    m4 "$TMPFILE" "../templ/$2.m4"
+    m4 ../../scripts/common.m4 "$TMPFILE" "../templ/$2.m4"
     rm "$TMPFILE"
 }
 
@@ -115,6 +115,9 @@ gen_bitfld()
         if [ "$FIRST" = "#" ]
         then
             continue
+        elif [ -z "$FIRST" ]
+        then
+            break
         fi
         echo "define(DATA_TYPE,$1)define(OFFS,$OFFS)dnl" > "$TMPFILE"
         SIZE=`echo $FIELD | cut -s -d":" -f2`

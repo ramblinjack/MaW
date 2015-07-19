@@ -1,14 +1,14 @@
 name=horseman
 plural=horsemen
 supertype=mounted
-land_unit
+movement_class=land
 icon=horseman.png
 movement=2
 attack=2
 defense=2
 health=10
 upgrades_to=knight
-requires=bronze, horse
+requires=bronze,horse
 
 attack_bonus_unit {
   against melee 25%

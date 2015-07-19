@@ -15,39 +15,47 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 dnl
 dnl All unit types inherit unit_type
 dnl They also inherit a specific type, depending on if they are air, land, sea or amphibious units.
-class NAME : public unit_type, ifdef(`LAND_UNIT', `land_unit', ifdef(`AIR_UNIT', `air_unit', ifdef(`SEA_UNIT', `sea_unit', ifdef(`AMPHIBIOUS_UNIT', `amphib_unit'))))
-dnl If we are compiling the client, include all the graphics stuff
-#ifdef CLIENT
-,gphx_obj
-#endif
-{
+class name : public unit_type {
   public:
-  NAME`()': unit_type(SUPERTYPE, MOVEMENT, ATTACK, DEFENSE, HEALTH, ifdef(`UPGRADES_TO', `UPGRADES_TO', `UNIT_E_NONE'), ifdef(`SPLASH_DAMAGE', `SPLASH_DAMAGE', `0'), {ifdef(`REQUIRES', `REQUIRES', `RESOURCE_E_NONE')})
-#ifdef CLIENT
-  , gphx_obj(DATADIR "/resc/" "ICON", nullptr, "ifdef(`PRETTY_NAME', `PRETTY_NAME', `NAME')", "ifdef(`PLURAL', `PLURAL', `NAME')")
-#endif            
-  {}
+  name`()': unit_type(
+    translit(supertype, `[a-z]', `[A-Z]'), // stype
+    movement,  // movs
+    attack,    // atk
+    defense,   // dfns
+    health,    // hlth
+    ifdef(`upgrades_to', `UPPER(`upgrades_to')', `MAW_UNIT_TYPE_NONE'), // upgrd
+    ifdef(`splash_damage', `splash_damage', `0'),  // splsh
+    {ifdef(`requires', `UPPER(`requires')', `MAW_RESC_NONE')}, // req_rescs
+    {ifdef(can_see, `UPPER(`can_see')', `MAW_UNIT_TYPE_NONE')}, // can_see
+    ifelse(movement_class, `land', `LAND', movement_class, `air', `AIR', movement_class, `helicopter', `HELI', movement_class, `sea', `SEA'), // mvmt_cls
+    ifdef(worker_unit, `worker_unit', `false'), // worker
+    ifdef(settler, `settler', `false'), // settler
+    ifdef(hidden, `hidden', `false'), // hidden
+    ifdef(oneshot, `oneshot', `false') // oneshot
+  )  {}
 
-  virtual float atk_bonus_unit(const unit_t target) const {
-    switch(get_unit_type(target)->get_stype()) {ifdef(`ATTACK_BONUS_UNIT', `ATTACK_BONUS_UNIT')
+  virtual float atk_bonus_unit(const maw_unit_info target) const {
+    switch(maw_get_unit_type(target)) {ifdef(`attack_bonus_unit', `attack_bonus_unit')
     default: return 0f;
     }
   }
-  virtual float def_bonus_unit(const unit_t target) const {
-    switch(get_unit_type(target)->get_stype()) {ifdef(`DEFENSE_BONUS_UNIT', `DEFENSE_BONUS_UNIT')
+  virtual float def_bonus_unit(maw_unit_info target) const {
+    switch(get_unit_supertype(target)) {ifdef(`defense_bonus_unit', `defense_bonus_unit')
     default: return 0f;
     }
   }
-  virtual float def_bonus_terr(const map::tile_t on) const {
-    switch(get_terr(on)) {ifdef(`DEFENSE_BONUS_TERRAIN', `DEFENSE_BONUS_TERRAIN')
+  virtual float def_bonus_terr(const map::maw_tile on) const {
+    switch(maw_get_terr(on)) {ifdef(`defense_bonus_terrain', `defense_bonus_terrain')
     default: return 0f;
     }
   }
-  virtual float atk_bonus_terr(const map::tile_t from,
-                               const map::tile_t to) const { ifdef(`ATTACK_BONUS_TERRAIN', `ATTACK_BONUS_TERRAIN')
+  virtual float atk_bonus_terr(map::maw_tile from,
+                               map::maw_tile to) const {
+    ifdef(`attack_bonus_terrain', `attack_bonus_terrain')
     return 0f;
   }
   virtual unisgned mov
   virtual movp mov_cst(map::tile_t to) const {
     get_uniq_mov_cst(to)
 };
+

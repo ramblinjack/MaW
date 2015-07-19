@@ -22,7 +22,8 @@
   things that are common to all  unit types.
  */
 
-#include "unit.hpp"
+#include "unit_glbl.h"
+#include <vector>
 
 namespace maw {
 namespace common {
@@ -30,70 +31,107 @@ namespace unit {
 
 class unit_type {
 private:
-  // supertype of this unit type
+  /*! supertype of this unit type */
   const supertype stype;
-  // base movement points the unit gets each turn. 
-  const movp_num_t movs;
-  // the base attack strength
+  /*! base movement points the unit gets each turn.  */
+  const unsigned movs;
+  /*! the base attack strength */
   const unsigned atk;
-  // the base defense strength
+  /*! the base defense strength */
   const unsigned dfns;
-  // the base health points
-  const hlth_t hlth;
-  // what unit this unit becomes when it upgrades
-  const type_t upgrd;
-  // splash damage
+  /*! the base health points */
+  const unsigned hlth;
+  /*! what unit this unit becomes when it upgrades */
+  const maw_unit_type upgrd;
+  /*! splash damage */
   const unsigned splsh;
-  // resources required to build this unit
-  std::vector<resc_t> req_resc;
+  /*! resources required to build this unit */
+  const std::vector<maw_resc> req_resc;
+  /*! a vector of units that this unit type can see even if they are 'hidden' */
+  const std::vector<maw_unit_type> can_see;
+  /*! movement class */
+  const maw_mvmt_cls mvmt_cls;
+
+  // special cases we will need to handle somehow
+  
+  /* is this unit a worker? */
+  const bool worker;
+  /* is this unit a settler? */
+  const bool settler;
+  /*! This unit can only be seen at a distance by those units which have it in
+    their 'can_see' vector */
+  const bool hidden;
+  /*! is this unit a 'oneshot'? This means it is destroyed on attack/defense */
+  const bool oneshot;
+  /*! Can this unit attack air units? */
+  const bool anti_air;
+
   // these are virtual functions, meant to be overridden by the individual
   // unit types
-
-  // defensive modifier on tile `on'.
-  virtual float def_bonus_terr(map::tile_t on) const = 0;
   
-  // defensive modifier against unit `against'
-  virtual float def_bonus_unit(unit_t against) const = 0;
+  /*! defensive modifier on tile `on'. */
+  virtual float def_bonus_terr(map::maw_tile on) const = 0;
   
-  // attack modifier when attacking unit target.
-  virtual float atk_bonus_unit(unit_t target) const = 0;
+  /*! defensive modifier against unit `against' */
+  virtual float def_bonus_unit(maw_unit_info against) const = 0;
   
-  // attack modifier when attacking from tile `from' to tile `to'.
-  virtual float atk_bonus_terr(map::tile_t from, map::tile_t to) const = 0;
+  /*! attack modifier when attacking unit target. */
+  virtual float atk_bonus_unit(maw_unit_info target) const = 0;
+  
+  /*! attack modifier when attacking from tile `from' to tile `to'. */
+  virtual float atk_bonus_terr(map::maw_tile from, map::maw_tile to) const = 0;
   
 public:
-  // this is the interface for a unit
-  unit_type(supertype stype, movp_num_t movs, unsigned atk, unsigned dfns,
-            hlth_t hlth, type_t upgrd, unsigned splsh,
-            const std::initializer_list<resc_t>):
+  /*! this is the interface for a unit */
+  unit_type(maw_supertype stype,
+            unsigned movs,
+            unsigned atk,
+            unsigned dfns,
+            unsigned hlth,
+            unsigned upgrd,
+            unsigned splsh,
+            const std::initializer_list<maw_resc> req_rescs,
+            const std::initializer_list<maw_unit_type> can_see,
+            maw_mvmt_cls mvmt_cls,
+            bool worker,
+            bool settler,
+            bool hidden,
+            bool oneshot,
+            bool anti_air
+            ):
     stype(stype), movs(movs), atk(atk), dfns(dfns),
-    hlth(hlth), upgrd(upgrd), splsh(splsh) {}
+    hlth(hlth), upgrd(upgrd), splsh(splsh),
+    req_resc(req_rescs), can_see(can_see), worker(worker),
+    settler(settler), hidden(hidden), oneshot(oneshot),
+    anti_air(anti_air)
+  {}
   
   /* Getters */
   // get supertype
   inline supertype get_stype() const {return stype;}
   
   // get the unit this upgrades to
-  inline type_t get_upgrd() const {return upgrd;}
+  inline maw_unit_type get_upgrd() const {return upgrd;}
 
   // get base health
   inline hlth_t get_hlth() const {return hlth;}
 
-  /* functions implemented in unit_type.cpp */
+  /* functions implemented in maw_unit_stateype.cpp */
   // how many moves does the unit has left?
-  movp get_rem_movs(unit_t unit) const;
+  movp get_rem_movs(maw_unit_state unit) const;
 
   // get attack strength for unit `unit' when it is attacking from tile `from'
   // to  tile `to' and it is attacking unit `against',
-  unsigned get_atk(unit_t unit, unit_t against,
-                   map::tile_t from, map::tile_t to) const;
+  unsigned get_atk(maw_unit_state unit, maw_unit_state against,
+                   map::maw_tile from, map::maw_tile to) const;
 
   // get defensive strength
-  unsigned get_dfns(unit_t unit, unit_t attacker, map::tile_t tile) const;
+  unsigned get_dfns(maw_unit_state unit, maw_unit_state attacker,
+                    map::maw_tile tile) const;
 
   // the cost of moving to tile `to'. A return value of 0 shall mean that it is
   // not possible for this unit to make this move.
-  virtual movp mov_cst(map::tile_t to) const = 0;
+  virtual movp mov_cst(map::maw_tile to) const = 0;
 };
 } // end namespace unit
 } // end namespace common
